@@ -50,15 +50,15 @@ if uploaded_file:
                 resultado = planificar_rutas(df, num_operarios)
                 
                 # Generar Excel para descargar
-                excel_bytes = generar_excel(resultado)
+                csv_bytes = generar_csv(resultado)
                 
                 # Mostrar botón de descarga
-                st.download_button(
-                    label="📥 Descargar Planificación Excel",
-                    data=excel_bytes,
-                    file_name=f"Planificacion_Rutas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                )
+             st.download_button(
+    label="📥 Descargar Planificación CSV",
+    data=csv_bytes,
+    file_name=f"Planificacion_Rutas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+    mime="text/csv",
+)
                 
                 # Mostrar resumen
                 st.subheader("Resumen de la planificación")
