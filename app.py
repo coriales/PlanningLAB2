@@ -5,7 +5,7 @@ import io
 from datetime import datetime
 
 # Importar funciones del planificador
-from route_planner import calcular_duracion, planificar_rutas, generar_excel
+from route_planner import calcular_duracion, planificar_rutas, generar_csv
 
 # Configuración de la página
 st.set_page_config(
@@ -49,24 +49,65 @@ if uploaded_file:
             with st.spinner("Generando planificación..."):
                 resultado = planificar_rutas(df, num_operarios)
                 
-                # Generar Excel para descargar
+                # Generar CSV para descargar
                 csv_bytes = generar_csv(resultado)
                 
                 # Mostrar botón de descarga
-             st.download_button(
-    label="📥 Descargar Planificación CSV",
-    data=csv_bytes,
-    file_name=f"Planificacion_Rutas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-    mime="text/csv",
-)
+                st.download_button(
+                    label="📥 Descargar Planificación CSV",
+                    data=csv_bytes,
+                    file_name=f"Planificacion_Rutas_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv",
+                )
                 
                 # Mostrar resumen
                 st.subheader("Resumen de la planificación")
                 st.write(f"Total de operarios: {num_operarios}")
                 st.write(f"Total de tareas planificadas: {resultado['total_tareas']}")
                 
+                # Mostrar tabla de resumen por operario
+                op_data = []
+                for op in resultado['operarios']:
+                    op_data.append({
+                        "Operario": f"Operario {op['operario_id']}",
+                        "Tareas asignadas": len(op['tareas']),
+                        "Tiempo total (min)": op['total_tiempo']
+                    })
+                
+                st.table(pd.DataFrame(op_data))
+                
+                # Mostrar detalles por operario
+                for op in resultado['operarios']:
+                    with st.expander(f"Operario {op['operario_id']} - Detalles"):
+                        if op['tareas']:
+                            # Agrupar por población
+                            poblaciones = {}
+                            for tarea in op['tareas']:
+                                if tarea['poblacion'] not in poblaciones:
+                                    poblaciones[tarea['poblacion']] = []
+                                poblaciones[tarea['poblacion']].append(tarea)
+                            
+                            # Mostrar tareas por población
+                            for pob, tareas in poblaciones.items():
+                                st.write(f"📍 **{pob}** - {len(tareas)} tareas")
+                                
+                                # Crear tabla de tareas
+                                tareas_data = []
+                                for tarea in tareas:
+                                    tareas_data.append({
+                                        "Cliente": tarea['cliente'],
+                                        "Dirección": tarea['direccion'],
+                                        "Tarea": tarea['descripcion'],
+                                        "Duración": f"{tarea['duracion']} min"
+                                    })
+                                
+                                st.table(pd.DataFrame(tareas_data))
+                        else:
+                            st.write("No hay tareas asignadas a este operario.")
+                
         except Exception as e:
             st.error(f"Error al procesar el archivo: {str(e)}")
+            st.exception(e)  # Esto muestra el error completo para depuración
 else:
     st.info("Por favor, cargue un archivo Excel para comenzar.")
 
