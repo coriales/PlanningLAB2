@@ -93,45 +93,7 @@ def planificar_rutas(df, num_operarios):
         'total_tareas': len(tareas)
     }
 
-def generar_excel(resultado):
-    """Genera un archivo Excel con la planificación."""
-    output = io.BytesIO()
-    
-    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        for operario in resultado['operarios']:
-            # Crear dataframe para el operario
-            data = []
-            
-            # Agrupar por población
-            poblaciones = {}
-            for tarea in operario['tareas']:
-                if tarea['poblacion'] not in poblaciones:
-                    poblaciones[tarea['poblacion']] = []
-                poblaciones[tarea['poblacion']].append(tarea)
-            
-            # Para cada población
-            for poblacion, tareas in poblaciones.items():
-                # Añadir encabezado de población
-                data.append({
-                    'Día': 'Lunes',
-                    'Población': poblacion,
-                    'Cliente': '',
-                    'Dirección': '',
-                    'Tarea': '',
-                    'Duración': ''
-                })
-                
-                # Añadir tareas
-                for tarea in tareas:
-                    data.append({
-                        'Día': '',
-                        'Población': '',
-                        'Cliente': tarea['cliente'],
-                        'Dirección': tarea['direccion'],
-                        'Tarea': tarea['descripcion'],
-                        'Duración': f"{tarea['duracion']} min"
-                    })
-            def generar_csv(resultado):
+def generar_csv(resultado):
     """Genera un archivo CSV con la planificación."""
     # Crear datos para CSV
     all_data = []
@@ -183,12 +145,3 @@ def generar_excel(resultado):
     # Convertir a CSV
     df = pd.DataFrame(all_data)
     return df.to_csv(index=False).encode('utf-8')
-
-    
-            # Crear dataframe y guardar en excel
-            if data:
-                df = pd.DataFrame(data)
-                df.to_excel(writer, sheet_name=f"Operario {operario['operario_id']}", index=False)
-    
-    output.seek(0)
-    return output.getvalue()
