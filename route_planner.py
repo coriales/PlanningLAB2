@@ -97,7 +97,7 @@ def generar_excel(resultado):
     """Genera un archivo Excel con la planificación."""
     output = io.BytesIO()
     
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         for operario in resultado['operarios']:
             # Crear dataframe para el operario
             data = []
