@@ -131,7 +131,60 @@ def generar_excel(resultado):
                         'Tarea': tarea['descripcion'],
                         'Duración': f"{tarea['duracion']} min"
                     })
+            def generar_csv(resultado):
+    """Genera un archivo CSV con la planificación."""
+    # Crear datos para CSV
+    all_data = []
+    
+    for operario in resultado['operarios']:
+        # Añadir encabezado de operario
+        all_data.append({
+            'Operario': f"Operario {operario['operario_id']}",
+            'Día': '',
+            'Población': '',
+            'Cliente': '',
+            'Dirección': '',
+            'Tarea': '',
+            'Duración': ''
+        })
+        
+        # Agrupar por población
+        poblaciones = {}
+        for tarea in operario['tareas']:
+            if tarea['poblacion'] not in poblaciones:
+                poblaciones[tarea['poblacion']] = []
+            poblaciones[tarea['poblacion']].append(tarea)
+        
+        # Para cada población
+        for poblacion, tareas in poblaciones.items():
+            # Añadir encabezado de población
+            all_data.append({
+                'Operario': '',
+                'Día': 'Lunes',
+                'Población': poblacion,
+                'Cliente': '',
+                'Dirección': '',
+                'Tarea': '',
+                'Duración': ''
+            })
             
+            # Añadir tareas
+            for tarea in tareas:
+                all_data.append({
+                    'Operario': '',
+                    'Día': '',
+                    'Población': '',
+                    'Cliente': tarea['cliente'],
+                    'Dirección': tarea['direccion'],
+                    'Tarea': tarea['descripcion'],
+                    'Duración': f"{tarea['duracion']} min"
+                })
+    
+    # Convertir a CSV
+    df = pd.DataFrame(all_data)
+    return df.to_csv(index=False).encode('utf-8')
+
+    
             # Crear dataframe y guardar en excel
             if data:
                 df = pd.DataFrame(data)
